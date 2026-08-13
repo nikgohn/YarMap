@@ -55,6 +55,16 @@
       background: #12151a;
     }
 
+    /* Keep Yandex base layer strictly below historical overlay scans */
+    .leaflet-yandex-container,
+    .leaflet-pane > [class*="ymaps-"] {
+      z-index: 0 !important;
+    }
+
+    .leaflet-pane.leaflet-historicalPane-pane {
+      z-index: 500 !important;
+    }
+
     /* Floating Header / Brand */
     .brand-card {
       position: absolute;
@@ -600,31 +610,35 @@
     // Zoom control in top-left
     L.control.zoom({ position: 'topleft' }).addTo(map);
 
+    // Create high priority pane for historical plans to always sit on top of base layers
+    map.createPane('historicalPane');
+    map.getPane('historicalPane').style.zIndex = 500;
+
     // Historical Tile Layers (Relative paths to map1, map2, map3)
     const scanLayers = {
       map1: L.tileLayer('./map1/{z}/{x}/{y}.png', {
+        pane: 'historicalPane',
         minZoom: 10,
         maxNativeZoom: 19,
         maxZoom: 22,
         opacity: 0.85,
-        tms: false,
-        zIndex: 10
+        tms: false
       }),
       map2: L.tileLayer('./map2/{z}/{x}/{y}.png', {
+        pane: 'historicalPane',
         minZoom: 10,
         maxNativeZoom: 19,
         maxZoom: 22,
         opacity: 0.85,
-        tms: false,
-        zIndex: 11
+        tms: false
       }),
       map3: L.tileLayer('./map3/{z}/{x}/{y}.png', {
+        pane: 'historicalPane',
         minZoom: 10,
         maxNativeZoom: 19,
         maxZoom: 22,
         opacity: 0.85,
-        tms: false,
-        zIndex: 12
+        tms: false
       })
     };
 
