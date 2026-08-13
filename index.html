@@ -5,8 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Исторические карты и разметка города</title>
   
-  <!-- Leaflet CSS -->
+  <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  
+  <!-- Yandex Maps API & Leaflet Yandex Plugin -->
+  <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU"></script>
+  <script src="https://unpkg.com/leaflet-plugins@3.4.0/layer/tile/Yandex.js"></script>
   
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -526,10 +531,13 @@
         <div class="section-title">Современная подложка</div>
         <select class="select-styled" id="basemap-select">
           <option value="esri_sat">Спутник ESRI (Высокое качество)</option>
+          <option value="yandex_sat">Спутник Яндекс (Официальный)</option>
+          <option value="yandex_hybrid">Яндекс Спутник + Улицы (Гибрид)</option>
           <option value="google_sat">Спутник Google</option>
-          <option value="yandex_sat">Спутник Яндекс</option>
+          <option value="google_hybrid">Спутник Google + Дороги (Гибрид)</option>
           <option value="osm">OpenStreetMap (Схема)</option>
           <option value="carto_dark">Темная схема (CartoDB Dark)</option>
+          <option value="carto_light">Светлая схема (CartoDB Light)</option>
         </select>
       </div>
 
@@ -539,30 +547,29 @@
   <!-- Bottom Info Coordinates -->
   <div class="info-bar" id="coords-bar">Координаты: 57.6250° N, 39.8850° E | Зум: 14</div>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
   <script>
     // Initial Center based on generated tiles (Yaroslavl area)
     const INITIAL_CENTER = [57.626, 39.885];
     const INITIAL_ZOOM = 14;
 
-    // Base Maps providers
+    // Base Maps providers (Strictly synchronized & accurate)
     const baseLayers = {
       esri_sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxNativeZoom: 19,
         maxZoom: 22,
         attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
       }),
+      yandex_sat: typeof L.Yandex !== 'undefined' ? new L.Yandex('satellite') : null,
+      yandex_hybrid: typeof L.Yandex !== 'undefined' ? new L.Yandex('hybrid') : null,
       google_sat: L.tileLayer('https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}', {
         maxNativeZoom: 20,
         maxZoom: 22,
         attribution: '&copy; Google Satellite'
       }),
-      yandex_sat: L.tileLayer('https://core-sat.maps.yandex.net/tiles?l=sat&x={x}&y={y}&z={z}&scale=1&lang=ru_RU', {
-        maxNativeZoom: 19,
+      google_hybrid: L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+        maxNativeZoom: 20,
         maxZoom: 22,
-        attribution: '&copy; Яндекс'
+        attribution: '&copy; Google Satellite / Labels'
       }),
       osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxNativeZoom: 19,
@@ -570,6 +577,11 @@
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }),
       carto_dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        maxNativeZoom: 19,
+        maxZoom: 22,
+        attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
+      }),
+      carto_light: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         maxNativeZoom: 19,
         maxZoom: 22,
         attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
@@ -698,10 +710,16 @@
     // Base Map Changer
     basemapSelect.addEventListener('change', (e) => {
       const newKey = e.target.value;
-      if (baseLayers[currentBaseKey]) map.removeLayer(baseLayers[currentBaseKey]);
-      baseLayers[newKey].addTo(map);
-      baseLayers[newKey].bringToBack();
-      currentBaseKey = newKey;
+      if (baseLayers[currentBaseKey] && map.hasLayer(baseLayers[currentBaseKey])) {
+        map.removeLayer(baseLayers[currentBaseKey]);
+      }
+      if (baseLayers[newKey]) {
+        baseLayers[newKey].addTo(map);
+        if (typeof baseLayers[newKey].bringToBack === 'function') {
+          baseLayers[newKey].bringToBack();
+        }
+        currentBaseKey = newKey;
+      }
     });
 
     // Fit to Center button
