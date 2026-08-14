@@ -6,7 +6,7 @@
   "source": "Ярославский шинный завод (ОКС) / Горархитектура",
   "original": "original.jpg",
   "tileFormat": "png",
-  "minZoom": 10,
+  "minZoom": 12,
   "maxNativeZoom": 19,
   "maxZoom": 22,
   "defaultVisible": false,
