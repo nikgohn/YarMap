@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Исторические карты и разметка города</title>
   
   <!-- Leaflet CSS & JS -->
@@ -20,17 +20,22 @@
 
   <style>
     :root {
-      --bg-panel: rgba(22, 27, 34, 0.88);
-      --bg-panel-hover: rgba(30, 36, 46, 0.95);
+      --bg-panel: rgba(18, 22, 28, 0.92);
+      --bg-panel-hover: rgba(26, 32, 42, 0.96);
+      --bg-card: rgba(255, 255, 255, 0.04);
+      --bg-card-hover: rgba(255, 255, 255, 0.08);
+      --bg-card-active: rgba(56, 139, 253, 0.12);
       --border-color: rgba(255, 255, 255, 0.12);
+      --border-active: rgba(56, 139, 253, 0.6);
       --text-main: #f0f6fc;
       --text-muted: #8b949e;
       --accent-color: #388bfd;
       --accent-hover: #58a6ff;
       --accent-active: #1f6feb;
+      --danger-color: #f85149;
       --radius: 12px;
-      --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
-      --blur: blur(14px);
+      --shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
+      --blur: blur(16px);
     }
 
     * {
@@ -65,7 +70,7 @@
       z-index: 500 !important;
     }
 
-    /* Floating Header / Brand */
+    /* Floating Brand Header */
     .brand-card {
       position: absolute;
       top: 16px;
@@ -99,16 +104,16 @@
       background: rgba(56, 139, 253, 0.2);
       color: var(--accent-hover);
       border: 1px solid rgba(56, 139, 253, 0.4);
-      padding: 2px 6px;
-      border-radius: 6px;
+      padding: 2px 8px;
+      border-radius: 20px;
     }
 
-    /* Main Control Panel */
+    /* Control Panel */
     .control-panel {
       position: absolute;
       top: 16px;
       right: 16px;
-      width: 320px;
+      width: 350px;
       max-height: calc(100vh - 32px);
       z-index: 1000;
       background: var(--bg-panel);
@@ -129,14 +134,21 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 10px;
     }
 
     .panel-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.5px;
       color: var(--text-muted);
+    }
+
+    .panel-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     .panel-content {
@@ -144,7 +156,20 @@
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 18px;
+      gap: 16px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    }
+
+    .panel-content::-webkit-scrollbar {
+      width: 6px;
+    }
+    .panel-content::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    .panel-content::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.35);
     }
 
     .section-title {
@@ -162,7 +187,7 @@
     /* Mode Switcher Tabs */
     .mode-switch {
       display: flex;
-      background: rgba(0, 0, 0, 0.35);
+      background: rgba(0, 0, 0, 0.4);
       border-radius: 8px;
       padding: 3px;
       gap: 2px;
@@ -173,7 +198,7 @@
       border: none;
       background: transparent;
       color: var(--text-muted);
-      padding: 7px 10px;
+      padding: 8px 10px;
       font-size: 12px;
       font-weight: 500;
       border-radius: 6px;
@@ -183,6 +208,7 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
+      font-family: inherit;
     }
 
     .mode-btn:hover {
@@ -196,50 +222,185 @@
       box-shadow: 0 2px 6px rgba(56, 139, 253, 0.35);
     }
 
+    /* Search & Spatial Marker Tools */
+    .search-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .search-input {
+      flex: 1;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-color);
+    }
+
+    .btn-pin-toggle {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+      font-family: inherit;
+      white-space: nowrap;
+    }
+
+    .btn-pin-toggle:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .btn-pin-toggle.active {
+      background: #f85149;
+      border-color: #ff7b72;
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 0 10px rgba(248, 81, 73, 0.4);
+    }
+
+    /* Active Marker Filter Chip */
+    .marker-filter-badge {
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(248, 81, 73, 0.15);
+      border: 1px solid rgba(248, 81, 73, 0.35);
+      color: #ff7b72;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 11px;
+      margin-bottom: 8px;
+      line-height: 1.3;
+    }
+
+    .marker-filter-badge.visible {
+      display: flex;
+    }
+
+    .btn-clear-marker {
+      background: transparent;
+      border: none;
+      color: #ff7b72;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 13px;
+    }
+
+    .btn-clear-marker:hover {
+      background: rgba(248, 81, 73, 0.25);
+    }
+
     /* Layer Items */
     .layer-card {
-      background: rgba(255, 255, 255, 0.04);
+      background: var(--bg-card);
       border: 1px solid var(--border-color);
-      border-radius: 8px;
+      border-radius: 10px;
       padding: 10px 12px;
       margin-bottom: 8px;
-      transition: border-color 0.15s, background 0.15s;
+      transition: all 0.15s ease;
     }
 
     .layer-card:hover {
-      background: rgba(255, 255, 255, 0.07);
+      background: var(--bg-card-hover);
       border-color: rgba(255, 255, 255, 0.2);
     }
 
     .layer-card.active {
-      border-color: rgba(56, 139, 253, 0.5);
-      background: rgba(56, 139, 253, 0.08);
+      border-color: var(--border-active);
+      background: var(--bg-card-active);
     }
 
     .layer-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
+      gap: 8px;
     }
 
-    .layer-label {
+    .layer-main {
       display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      font-weight: 500;
+      gap: 10px;
+      flex: 1;
       cursor: pointer;
       user-select: none;
-      flex: 1;
+      min-width: 0;
     }
 
-    .layer-label input[type="checkbox"],
-    .layer-label input[type="radio"] {
+    .layer-main input[type="checkbox"],
+    .layer-main input[type="radio"] {
       cursor: pointer;
       accent-color: var(--accent-color);
       width: 16px;
       height: 16px;
+      flex-shrink: 0;
+    }
+
+    .layer-text-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .layer-title-text {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .layer-year-tag {
+      font-size: 11px;
+      color: var(--accent-hover);
+      font-weight: 500;
+    }
+
+    .layer-tools {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .tool-icon-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tool-icon-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--border-color);
     }
 
     /* Slider Container */
@@ -282,7 +443,7 @@
       background: rgba(0, 0, 0, 0.35);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      padding: 8px 12px;
+      padding: 9px 12px;
       border-radius: 8px;
       font-size: 13px;
       outline: none;
@@ -299,8 +460,8 @@
       background: rgba(255, 255, 255, 0.07);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      padding: 8px 12px;
-      border-radius: 8px;
+      padding: 6px 10px;
+      border-radius: 7px;
       font-size: 12px;
       font-weight: 500;
       cursor: pointer;
@@ -313,15 +474,124 @@
     }
 
     .btn-action:hover {
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.14);
       border-color: rgba(255, 255, 255, 0.25);
     }
 
     .btn-action:active {
-      transform: scale(0.98);
+      transform: scale(0.97);
     }
 
-    /* Bottom Coordinate Bar */
+    .btn-primary {
+      background: var(--accent-color);
+      border-color: var(--accent-hover);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Info Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 2000;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-card {
+      background: #161b22;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      animation: modalSlide 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalSlide {
+      from { transform: translateY(20px) scale(0.97); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+
+    .modal-head {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-head-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+      color: var(--text-main);
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      padding-bottom: 8px;
+    }
+
+    .meta-label {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .meta-val {
+      font-weight: 600;
+      color: var(--accent-hover);
+      text-align: right;
+    }
+
+    .modal-desc {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 12px;
+      color: #d0d7de;
+      font-size: 13px;
+    }
+
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    /* Bottom Info Bar */
     .info-bar {
       position: absolute;
       bottom: 12px;
@@ -346,7 +616,7 @@
       bottom: 0;
       width: 4px;
       background: #ffffff;
-      box-shadow: 0 0 12px rgba(0, 0, 0, 0.6);
+      box-shadow: 0 0 14px rgba(0, 0, 0, 0.8);
       z-index: 1500;
       cursor: ew-resize;
       pointer-events: auto;
@@ -357,11 +627,11 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 38px;
-      height: 38px;
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background: #ffffff;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -370,6 +640,17 @@
       cursor: ew-resize;
       user-select: none;
       border: 2px solid var(--accent-color);
+    }
+
+    .swipe-hint {
+      font-size: 11px;
+      color: var(--accent-hover);
+      background: rgba(56, 139, 253, 0.12);
+      border: 1px solid rgba(56, 139, 253, 0.25);
+      border-radius: 6px;
+      padding: 8px 10px;
+      margin-top: 4px;
+      line-height: 1.4;
     }
 
     /* Leaflet Control Overrides */
@@ -394,7 +675,7 @@
     }
 
     .leaflet-control-attribution {
-      background: rgba(0, 0, 0, 0.5) !important;
+      background: rgba(0, 0, 0, 0.6) !important;
       color: rgba(255, 255, 255, 0.5) !important;
       font-size: 10px !important;
     }
@@ -403,15 +684,58 @@
       color: rgba(255, 255, 255, 0.7) !important;
     }
 
-    .swipe-hint {
-      font-size: 11px;
-      color: var(--accent-hover);
-      background: rgba(56, 139, 253, 0.12);
-      border: 1px solid rgba(56, 139, 253, 0.25);
-      border-radius: 6px;
-      padding: 6px 10px;
-      margin-top: 4px;
-      line-height: 1.4;
+    /* Custom Pulsing Search Marker */
+    .search-pin-icon {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-pin-circle {
+      width: 24px;
+      height: 24px;
+      background: #f85149;
+      border: 3px solid #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 12px;
+      z-index: 2;
+    }
+
+    .search-pin-pulse {
+      position: absolute;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(248, 81, 73, 0.4);
+      animation: pinPulse 1.8s infinite ease-out;
+      z-index: 1;
+    }
+
+    @keyframes pinPulse {
+      0% { transform: scale(0.5); opacity: 0.9; }
+      100% { transform: scale(1.6); opacity: 0; }
+    }
+
+    @media (max-width: 600px) {
+      .control-panel {
+        width: calc(100vw - 32px);
+        max-height: 55vh;
+      }
+      .brand-card {
+        left: 12px;
+        top: 12px;
+        padding: 6px 12px;
+      }
+      .brand-title {
+        font-size: 13px;
+      }
     }
   </style>
 </head>
@@ -421,13 +745,13 @@
   <div class="brand-card">
     <div class="brand-title">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+        <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 1 6"></polygon>
         <line x1="8" y1="2" x2="8" y2="18"></line>
         <line x1="16" y1="6" x2="16" y2="22"></line>
       </svg>
-      Привязка исторических сканов
+      Исторические карты
     </div>
-    <span class="brand-badge">3 карты</span>
+    <span class="brand-badge" id="map-count-badge">Загрузка...</span>
   </div>
 
   <!-- Map Container -->
@@ -438,7 +762,6 @@
     <div id="swipe-handle">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="15 18 9 12 15 6"></polyline>
-        <polyline points="9 18 3 12 9 6" style="display:none;"></polyline>
       </svg>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left: -8px;">
         <polyline points="9 18 15 12 9 6"></polyline>
@@ -449,14 +772,16 @@
   <!-- Control Panel -->
   <div class="control-panel">
     <div class="panel-header">
-      <span class="panel-title">Управление слоями</span>
-      <button class="btn-action" id="btn-fit" title="Приблизить к планам" style="padding: 4px 8px;">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
-        </svg>
-        К центру
-      </button>
+      <span class="panel-title">Слои и карты</span>
+      <div class="panel-actions">
+        <button class="btn-action" id="btn-fit" title="Приблизить к центру планов">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+          </svg>
+          К центру
+        </button>
+      </div>
     </div>
 
     <div class="panel-content">
@@ -482,57 +807,37 @@
         </div>
       </div>
 
-      <!-- Historical Maps List -->
+      <!-- Historical Maps List & Marker Search -->
       <div>
-        <div class="section-title">Исторические планы</div>
+        <div class="section-title">
+          <span>Архивные планы</span>
+        </div>
         
-        <!-- Map 1 -->
-        <div class="layer-card active" id="card-map1">
-          <div class="layer-head">
-            <label class="layer-label">
-              <input type="checkbox" id="chk-map1" checked />
-              <span id="title-map1">План 1 (map1)</span>
-            </label>
-          </div>
-          <div class="slider-row" id="slider-box-map1">
-            <label>Прозрачность</label>
-            <input type="range" id="op-map1" min="0" max="100" value="85" />
-            <span class="slider-val" id="val-map1">85%</span>
-          </div>
+        <!-- Search and Marker Button Row -->
+        <div class="search-row">
+          <input type="text" id="search-maps" class="search-input" placeholder="Поиск по названию или году..." />
+          <button class="btn-pin-toggle" id="btn-pin-search" title="Кликните на карте, чтобы найти планы в этой точке">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+              <circle cx="12" cy="10" r="3"></circle>
+            </svg>
+            Маркер
+          </button>
         </div>
 
-        <!-- Map 2 -->
-        <div class="layer-card" id="card-map2">
-          <div class="layer-head">
-            <label class="layer-label">
-              <input type="checkbox" id="chk-map2" />
-              <span id="title-map2">План 2 (map2)</span>
-            </label>
-          </div>
-          <div class="slider-row" id="slider-box-map2">
-            <label>Прозрачность</label>
-            <input type="range" id="op-map2" min="0" max="100" value="85" />
-            <span class="slider-val" id="val-map2">85%</span>
-          </div>
+        <!-- Marker active filter alert chip -->
+        <div class="marker-filter-badge" id="marker-filter-chip">
+          <span id="marker-filter-text">📍 Фильтр по точке на карте</span>
+          <button class="btn-clear-marker" id="btn-clear-marker" title="Сбросить маркер">✕</button>
         </div>
 
-        <!-- Map 3 -->
-        <div class="layer-card" id="card-map3">
-          <div class="layer-head">
-            <label class="layer-label">
-              <input type="checkbox" id="chk-map3" />
-              <span id="title-map3">План 3 (map3)</span>
-            </label>
-          </div>
-          <div class="slider-row" id="slider-box-map3">
-            <label>Прозрачность</label>
-            <input type="range" id="op-map3" min="0" max="100" value="85" />
-            <span class="slider-val" id="val-map3">85%</span>
-          </div>
+        <!-- Container where cards are dynamically created -->
+        <div id="maps-list-container">
+          <div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 16px 0;">Загрузка каталога карт...</div>
         </div>
 
         <div id="swipe-instruction" class="swipe-hint" style="display: none;">
-          👉 <b>Режим шторки активен:</b> двигайте белую полосу по центру экрана влево и вправо для сравнения старого плана со спутником.
+          👉 <b>Режим шторки:</b> выберите один план выше и двигайте вертикальную полосу по экрану для сравнения со спутником.
         </div>
       </div>
 
@@ -554,13 +859,52 @@
     </div>
   </div>
 
+  <!-- Info Modal Dialog -->
+  <div class="modal-backdrop" id="info-modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <span class="modal-head-title" id="modal-title">Информация о карте</span>
+        <button class="tool-icon-btn" id="modal-close" title="Закрыть">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="meta-row">
+          <span class="meta-label">Период / Год:</span>
+          <span class="meta-val" id="modal-year">—</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Источник / Архив:</span>
+          <span class="meta-val" id="modal-source">—</span>
+        </div>
+        <div class="meta-row">
+          <span class="meta-label">Диапазон зума:</span>
+          <span class="meta-val" id="modal-zoom">—</span>
+        </div>
+        <div>
+          <span class="meta-label" style="display: block; margin-bottom: 6px;">Описание:</span>
+          <div class="modal-desc" id="modal-desc">—</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a href="#" target="_blank" class="btn-action btn-primary" id="modal-original-btn" style="text-decoration: none;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Открыть оригинал скана
+        </a>
+      </div>
+    </div>
+  </div>
+
   <!-- Bottom Info Coordinates -->
   <div class="info-bar" id="coords-bar">Координаты: 57.6250° N, 39.8850° E | Зум: 14</div>
 
   <script>
-    // Initial Center based on generated tiles (Yaroslavl area)
     const INITIAL_CENTER = [57.626, 39.885];
     const INITIAL_ZOOM = 14;
+
+    const DEFAULT_MAP_IDS = ["map1", "map2", "map3", "zv_1mkr"];
 
     // Base Maps providers (Strictly synchronized & accurate)
     const baseLayers = {
@@ -607,66 +951,33 @@
       layers: [baseLayers.esri_sat]
     });
 
-    // Zoom control in top-left
     L.control.zoom({ position: 'topleft' }).addTo(map);
 
-    // Create high priority pane for historical plans to always sit on top of base layers
+    // Dedicated high-priority pane for historical overlay plans
     map.createPane('historicalPane');
     map.getPane('historicalPane').style.zIndex = 500;
 
-    // Historical Tile Layers (Relative paths to map1, map2, map3)
-    const scanLayers = {
-      map1: L.tileLayer('./map1/{z}/{x}/{y}.png', {
-        pane: 'historicalPane',
-        minZoom: 10,
-        maxNativeZoom: 19,
-        maxZoom: 22,
-        opacity: 0.85,
-        tms: false
-      }),
-      map2: L.tileLayer('./map2/{z}/{x}/{y}.png', {
-        pane: 'historicalPane',
-        minZoom: 10,
-        maxNativeZoom: 19,
-        maxZoom: 22,
-        opacity: 0.85,
-        tms: false
-      }),
-      map3: L.tileLayer('./map3/{z}/{x}/{y}.png', {
-        pane: 'historicalPane',
-        minZoom: 10,
-        maxNativeZoom: 19,
-        maxZoom: 22,
-        opacity: 0.85,
-        tms: false
-      })
-    };
-
-    // Add map1 by default
-    scanLayers.map1.addTo(map);
-
-    // Current State
+    // State
+    let mapsRegistry = [];
+    const scanLayers = {};
     let currentMode = 'overlay'; // 'overlay' | 'swipe'
     let currentBaseKey = 'esri_sat';
-    let swipePercent = 50; // 0% to 100%
-    let activeSwipeScan = 'map1';
+    let swipePercent = 50;
+    let activeSwipeScan = '';
+
+    // Spatial Search Marker State
+    let markerSearchActive = false;
+    let searchMarker = null;
+    let activeMarkerLatLng = null;
 
     // UI Elements
-    const chk1 = document.getElementById('chk-map1');
-    const chk2 = document.getElementById('chk-map2');
-    const chk3 = document.getElementById('chk-map3');
-
-    const op1 = document.getElementById('op-map1');
-    const op2 = document.getElementById('op-map2');
-    const op3 = document.getElementById('op-map3');
-
-    const val1 = document.getElementById('val-map1');
-    const val2 = document.getElementById('val-map2');
-    const val3 = document.getElementById('val-map3');
-
-    const card1 = document.getElementById('card-map1');
-    const card2 = document.getElementById('card-map2');
-    const card3 = document.getElementById('card-map3');
+    const mapsListContainer = document.getElementById('maps-list-container');
+    const mapCountBadge = document.getElementById('map-count-badge');
+    const searchInput = document.getElementById('search-maps');
+    const btnPinSearch = document.getElementById('btn-pin-search');
+    const markerFilterChip = document.getElementById('marker-filter-chip');
+    const markerFilterText = document.getElementById('marker-filter-text');
+    const btnClearMarker = document.getElementById('btn-clear-marker');
 
     const modeOverlayBtn = document.getElementById('mode-overlay');
     const modeSwipeBtn = document.getElementById('mode-swipe');
@@ -676,52 +987,347 @@
     const basemapSelect = document.getElementById('basemap-select');
     const btnFit = document.getElementById('btn-fit');
 
-    // Opacity Sync
-    function syncOpacity(key, input, valEl) {
-      input.addEventListener('input', (e) => {
-        const v = e.target.value;
-        valEl.textContent = `${v}%`;
-        scanLayers[key].setOpacity(v / 100);
-      });
+    // Modal Elements
+    const infoModal = document.getElementById('info-modal');
+    const modalClose = document.getElementById('modal-close');
+    const modalTitle = document.getElementById('modal-title');
+    const modalYear = document.getElementById('modal-year');
+    const modalSource = document.getElementById('modal-source');
+    const modalZoom = document.getElementById('modal-zoom');
+    const modalDesc = document.getElementById('modal-desc');
+    const modalOriginalBtn = document.getElementById('modal-original-btn');
+
+    modalClose.addEventListener('click', () => infoModal.classList.remove('active'));
+    infoModal.addEventListener('click', (e) => {
+      if (e.target === infoModal) infoModal.classList.remove('active');
+    });
+
+    function openInfoModal(meta) {
+      modalTitle.textContent = meta.title || meta.id;
+      modalYear.textContent = meta.year || 'Не указан';
+      modalSource.textContent = meta.source || 'Не указан';
+      modalZoom.textContent = `${meta.minZoom || 10} – ${meta.maxNativeZoom || 19}`;
+      modalDesc.textContent = meta.description || 'Описание отсутствует.';
+      
+      const originalPath = meta.original ? `./maps/${meta.id}/.map/${meta.original}` : '#';
+      modalOriginalBtn.href = originalPath;
+      modalOriginalBtn.style.display = meta.original ? 'inline-flex' : 'none';
+
+      infoModal.classList.add('active');
     }
-    syncOpacity('map1', op1, val1);
-    syncOpacity('map2', op2, val2);
-    syncOpacity('map3', op3, val3);
 
-    // Layer Toggle Handlers
-    function handleToggle(key, chk, card) {
-      chk.addEventListener('change', () => {
-        if (currentMode === 'overlay') {
-          if (chk.checked) {
-            map.addLayer(scanLayers[key]);
-            card.classList.add('active');
-          } else {
-            map.removeLayer(scanLayers[key]);
-            card.classList.remove('active');
-          }
-        } else if (currentMode === 'swipe') {
-          // In swipe mode, act as radio button
-          activeSwipeScan = key;
-          [chk1, chk2, chk3].forEach(c => c.checked = (c === chk));
-          [card1, card2, card3].forEach(c => c.classList.remove('active'));
-          card.classList.add('active');
-
-          Object.keys(scanLayers).forEach(k => {
-            if (k === key) {
-              if (!map.hasLayer(scanLayers[k])) map.addLayer(scanLayers[k]);
-            } else {
-              if (map.hasLayer(scanLayers[k])) map.removeLayer(scanLayers[k]);
-            }
-          });
-          updateSwipeClip();
+    // Dynamic Loader: Discover and Load Maps
+    async function loadMaps() {
+      let mapIds = DEFAULT_MAP_IDS;
+      try {
+        const res = await fetch('./maps/maps.json');
+        if (res.ok) {
+          mapIds = await res.json();
         }
+      } catch (e) {
+        console.warn('Could not fetch ./maps/maps.json, using default IDs', e);
+      }
+
+      mapsRegistry = [];
+
+      for (const id of mapIds) {
+        let meta = {
+          id: id,
+          title: `План (${id})`,
+          year: '',
+          description: '',
+          source: '',
+          original: '',
+          tileFormat: 'png',
+          bounds: null,
+          minZoom: 10,
+          maxNativeZoom: 19,
+          maxZoom: 22,
+          defaultVisible: mapsRegistry.length === 0,
+          defaultOpacity: 0.85
+        };
+
+        try {
+          const infoRes = await fetch(`./maps/${id}/.map/info.json`);
+          if (infoRes.ok) {
+            const infoData = await infoRes.json();
+            meta = { ...meta, ...infoData, id: id };
+          }
+        } catch (err) {
+          console.warn(`No info.json for ${id}, using defaults`, err);
+        }
+
+        const ext = meta.tileFormat || 'png';
+
+        // Initialize TileLayer
+        scanLayers[id] = L.tileLayer(`./maps/${id}/{z}/{x}/{y}.${ext}`, {
+          pane: 'historicalPane',
+          minZoom: meta.minZoom || 10,
+          maxNativeZoom: meta.maxNativeZoom || 19,
+          maxZoom: meta.maxZoom || 22,
+          opacity: meta.defaultOpacity || 0.85,
+          tms: false
+        });
+
+        scanLayers[id].on('tileload load', () => {
+          if (currentMode === 'swipe') updateSwipeClip();
+        });
+
+        if (meta.defaultVisible) {
+          scanLayers[id].addTo(map);
+          if (!activeSwipeScan) activeSwipeScan = id;
+        }
+
+        mapsRegistry.push(meta);
+      }
+
+      if (!activeSwipeScan && mapsRegistry.length > 0) {
+        activeSwipeScan = mapsRegistry[0].id;
+      }
+
+      mapCountBadge.textContent = `${mapsRegistry.length} ${pluralizeMaps(mapsRegistry.length)}`;
+      renderMapCards();
+    }
+
+    function pluralizeMaps(n) {
+      if (n % 10 === 1 && n % 100 !== 11) return 'карта';
+      if (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 10 || n % 100 >= 20)) return 'карты';
+      return 'карт';
+    }
+
+    // Check if latlng falls within map bounds
+    function isPointInMap(lat, lng, bounds) {
+      if (!bounds || !Array.isArray(bounds) || bounds.length !== 2) return true;
+      const south = Math.min(bounds[0][0], bounds[1][0]);
+      const north = Math.max(bounds[0][0], bounds[1][0]);
+      const west = Math.min(bounds[0][1], bounds[1][1]);
+      const east = Math.max(bounds[0][1], bounds[1][1]);
+
+      return (lat >= south && lat <= north && lng >= west && lng <= east);
+    }
+
+    // Render Cards in Sidebar
+    function renderMapCards() {
+      const textQuery = (searchInput.value || '').toLowerCase().trim();
+      mapsListContainer.innerHTML = '';
+
+      let matchingCount = 0;
+
+      const filtered = mapsRegistry.filter(m => {
+        // Text filter
+        const matchesText = !textQuery || 
+          m.title.toLowerCase().includes(textQuery) || 
+          (m.year && m.year.toLowerCase().includes(textQuery)) ||
+          m.id.toLowerCase().includes(textQuery);
+
+        if (!matchesText) return false;
+
+        // Spatial Marker filter
+        if (activeMarkerLatLng && m.bounds) {
+          const inBounds = isPointInMap(activeMarkerLatLng.lat, activeMarkerLatLng.lng, m.bounds);
+          if (inBounds) matchingCount++;
+          return inBounds;
+        }
+
+        matchingCount++;
+        return true;
+      });
+
+      // Update Marker Chip text
+      if (activeMarkerLatLng) {
+        markerFilterChip.classList.add('visible');
+        markerFilterText.innerHTML = `📍 Точка: <b>${activeMarkerLatLng.lat.toFixed(4)}°N, ${activeMarkerLatLng.lng.toFixed(4)}°E</b> (найдено: ${matchingCount})`;
+      } else {
+        markerFilterChip.classList.remove('visible');
+      }
+
+      if (filtered.length === 0) {
+        mapsListContainer.innerHTML = `
+          <div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 18px 0; line-height: 1.5;">
+            🔍 На этом месте исторических планов не найдено.<br/>
+            <span style="font-size: 11px; opacity: 0.7;">Попробуйте переместить маркер ближе к центру города или сбросить фильтр.</span>
+          </div>
+        `;
+        return;
+      }
+
+      filtered.forEach(meta => {
+        const id = meta.id;
+        const isVisible = map.hasLayer(scanLayers[id]);
+        const isSwipeActive = (currentMode === 'swipe' && activeSwipeScan === id);
+        const cardActive = currentMode === 'swipe' ? isSwipeActive : isVisible;
+
+        const card = document.createElement('div');
+        card.className = `layer-card ${cardActive ? 'active' : ''}`;
+        card.id = `card-${id}`;
+
+        const inputType = currentMode === 'swipe' ? 'radio' : 'checkbox';
+        const isChecked = currentMode === 'swipe' ? isSwipeActive : isVisible;
+
+        card.innerHTML = `
+          <div class="layer-head">
+            <label class="layer-main">
+              <input type="${inputType}" name="historical-map-select" id="chk-${id}" ${isChecked ? 'checked' : ''} />
+              <div class="layer-text-group">
+                <span class="layer-title-text" title="${meta.title}">${meta.title}</span>
+                ${meta.year ? `<span class="layer-year-tag">${meta.year}</span>` : ''}
+              </div>
+            </label>
+            <div class="layer-tools">
+              <button class="tool-icon-btn btn-focus" title="Приблизить к этому плану" data-id="${id}">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+              </button>
+              <button class="tool-icon-btn btn-info" title="Информация и оригинал" data-id="${id}">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="12" y1="16" x2="12" y2="12"></line>
+                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                </svg>
+              </button>
+            </div>
+          </div>
+          <div class="slider-row" id="slider-box-${id}" style="${currentMode === 'swipe' ? 'display:none;' : ''}">
+            <label>Прозрачность</label>
+            <input type="range" id="op-${id}" min="0" max="100" value="${Math.round((scanLayers[id].options.opacity || 0.85) * 100)}" />
+            <span class="slider-val" id="val-${id}">${Math.round((scanLayers[id].options.opacity || 0.85) * 100)}%</span>
+          </div>
+        `;
+
+        // Toggle Event
+        const chk = card.querySelector(`#chk-${id}`);
+        chk.addEventListener('change', () => {
+          if (currentMode === 'overlay') {
+            if (chk.checked) {
+              map.addLayer(scanLayers[id]);
+              card.classList.add('active');
+            } else {
+              map.removeLayer(scanLayers[id]);
+              card.classList.remove('active');
+            }
+          } else if (currentMode === 'swipe') {
+            activeSwipeScan = id;
+            document.querySelectorAll('.layer-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+
+            Object.keys(scanLayers).forEach(k => {
+              if (k === id) {
+                if (!map.hasLayer(scanLayers[k])) map.addLayer(scanLayers[k]);
+              } else {
+                if (map.hasLayer(scanLayers[k])) map.removeLayer(scanLayers[k]);
+              }
+            });
+            updateSwipeClip();
+          }
+        });
+
+        // Opacity Slider Event
+        const opInput = card.querySelector(`#op-${id}`);
+        const valSpan = card.querySelector(`#val-${id}`);
+        opInput.addEventListener('input', (e) => {
+          const v = e.target.value;
+          valSpan.textContent = `${v}%`;
+          scanLayers[id].setOpacity(v / 100);
+        });
+
+        // Focus Button Event
+        const focusBtn = card.querySelector('.btn-focus');
+        focusBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (meta.bounds) {
+            map.fitBounds(meta.bounds, { padding: [40, 40], maxZoom: 17 });
+          }
+        });
+
+        // Info Button Event
+        const infoBtn = card.querySelector('.btn-info');
+        infoBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openInfoModal(meta);
+        });
+
+        mapsListContainer.appendChild(card);
       });
     }
-    handleToggle('map1', chk1, card1);
-    handleToggle('map2', chk2, card2);
-    handleToggle('map3', chk3, card3);
 
+    searchInput.addEventListener('input', renderMapCards);
+
+    // ==========================================
+    // Spatial Marker Search Logic
+    // ==========================================
+    const searchPinIcon = L.divIcon({
+      className: 'search-pin-icon',
+      html: `
+        <div class="search-pin-pulse"></div>
+        <div class="search-pin-circle">📍</div>
+      `,
+      iconSize: [44, 44],
+      iconAnchor: [22, 22]
+    });
+
+    function setMarkerPosition(latlng) {
+      activeMarkerLatLng = latlng;
+
+      if (!searchMarker) {
+        searchMarker = L.marker(latlng, {
+          icon: searchPinIcon,
+          draggable: true,
+          zIndexOffset: 1000
+        }).addTo(map);
+
+        searchMarker.on('drag', (e) => {
+          activeMarkerLatLng = e.target.getLatLng();
+          renderMapCards();
+        });
+      } else {
+        searchMarker.setLatLng(latlng);
+        if (!map.hasLayer(searchMarker)) searchMarker.addTo(map);
+      }
+
+      renderMapCards();
+    }
+
+    function clearMarkerSearch() {
+      activeMarkerLatLng = null;
+      if (searchMarker && map.hasLayer(searchMarker)) {
+        map.removeLayer(searchMarker);
+      }
+      markerSearchActive = false;
+      btnPinSearch.classList.remove('active');
+      map.getContainer().style.cursor = '';
+      renderMapCards();
+    }
+
+    btnPinSearch.addEventListener('click', () => {
+      markerSearchActive = !markerSearchActive;
+      if (markerSearchActive) {
+        btnPinSearch.classList.add('active');
+        map.getContainer().style.cursor = 'crosshair';
+
+        // If no marker yet, place at center
+        if (!activeMarkerLatLng) {
+          setMarkerPosition(map.getCenter());
+        }
+      } else {
+        btnPinSearch.classList.remove('active');
+        map.getContainer().style.cursor = '';
+      }
+    });
+
+    btnClearMarker.addEventListener('click', clearMarkerSearch);
+
+    // Map click: place or move search marker
+    map.on('click', (e) => {
+      if (markerSearchActive) {
+        setMarkerPosition(e.latlng);
+      }
+    });
+
+    // ==========================================
     // Base Map Changer
+    // ==========================================
     basemapSelect.addEventListener('change', (e) => {
       const newKey = e.target.value;
       if (baseLayers[currentBaseKey] && map.hasLayer(baseLayers[currentBaseKey])) {
@@ -736,7 +1342,7 @@
       }
     });
 
-    // Fit to Center button
+    // Fit to Center
     btnFit.addEventListener('click', () => {
       map.flyTo(INITIAL_CENTER, 15, { duration: 1.2 });
     });
@@ -746,7 +1352,9 @@
       coordsBar.textContent = `Координаты: ${e.latlng.lat.toFixed(5)}° N, ${e.latlng.lng.toFixed(5)}° E | Зум: ${map.getZoom()}`;
     });
 
+    // ==========================================
     // Swipe Mode Logic
+    // ==========================================
     function updateSwipeClip() {
       if (currentMode !== 'swipe') return;
       const size = map.getSize();
@@ -789,24 +1397,17 @@
           }
         });
 
-        // Restore normal layer checkboxes
-        [chk1, chk2, chk3].forEach(c => c.type = 'checkbox');
-        if (chk1.checked && !map.hasLayer(scanLayers.map1)) map.addLayer(scanLayers.map1);
-        if (chk2.checked && !map.hasLayer(scanLayers.map2)) map.addLayer(scanLayers.map2);
-        if (chk3.checked && !map.hasLayer(scanLayers.map3)) map.addLayer(scanLayers.map3);
+        renderMapCards();
       } else {
         modeSwipeBtn.classList.add('active');
         modeOverlayBtn.classList.remove('active');
         swipeDivider.style.display = 'block';
         swipeInstruction.style.display = 'block';
 
-        // In swipe mode, ensure only 1 active historical layer
-        [chk1, chk2, chk3].forEach(c => c.type = 'radio');
-        if (!chk1.checked && !chk2.checked && !chk3.checked) {
-          chk1.checked = true;
-          activeSwipeScan = 'map1';
+        if (!activeSwipeScan && mapsRegistry.length > 0) {
+          activeSwipeScan = mapsRegistry[0].id;
         }
-        
+
         Object.keys(scanLayers).forEach(k => {
           const isCurrent = (k === activeSwipeScan);
           if (isCurrent) {
@@ -816,6 +1417,7 @@
           }
         });
 
+        renderMapCards();
         setTimeout(updateSwipeClip, 50);
         updateSwipeClip();
       }
@@ -863,13 +1465,11 @@
       if (e.touches && e.touches[0]) doDrag(e.touches[0].clientX);
     }, { passive: false });
 
-    // Update clip on map move/zoom/tileload
+    // Update clip on map move/zoom/resize
     map.on('move zoom viewreset resize', updateSwipeClip);
-    Object.keys(scanLayers).forEach(k => {
-      scanLayers[k].on('tileload load', () => {
-        if (currentMode === 'swipe') updateSwipeClip();
-      });
-    });
+
+    // Initial Load
+    loadMaps();
 
   </script>
 </body>
