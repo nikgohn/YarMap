@@ -76,10 +76,21 @@ function processMaps() {
     if (!fs.existsSync(dotMapDir)) fs.mkdirSync(dotMapDir, { recursive: true });
 
     let originalFile = "";
-    for (const f of fs.readdirSync(dotMapDir)) {
+    const dotMapFiles = fs.readdirSync(dotMapDir);
+    // 1. Ищем original.*
+    for (const f of dotMapFiles) {
       if (f.toLowerCase().startsWith("original.")) {
         originalFile = f;
         break;
+      }
+    }
+    // 2. Ищем любое изображение в .map/
+    if (!originalFile) {
+      for (const f of dotMapFiles) {
+        if (f.toLowerCase() !== "info.json" && /\.(jpg|jpeg|png|webp|tif|tiff|pdf)$/i.test(f)) {
+          originalFile = f;
+          break;
+        }
       }
     }
 
@@ -95,13 +106,27 @@ function processMaps() {
       }
     }
 
+    // 1. Всегда синхронизируем id с именем папки
     info.id = entry;
-    if (!info.title) info.title = `Исторический план (${entry})`;
+
+    // 2. Дефолтный title, если пустой или из шаблона
+    if (!info.title || info.title === "Название исторического плана или карты") {
+      info.title = `Исторический план (${entry})`;
+    }
     if (info.year === undefined) info.year = "";
     if (!info.description) info.description = "Описание исторического плана.";
     if (!info.source) info.source = "Городской архив";
-    if (!info.original) info.original = originalFile;
 
+    // 3. Синхронизируем оригинал по реальному файлу на диске
+    if (info.original) {
+      if (!fs.existsSync(path.join(dotMapDir, info.original))) {
+        info.original = originalFile;
+      }
+    } else {
+      info.original = originalFile;
+    }
+
+    // 4. Технические параметры
     info.tileFormat = ext;
     info.minZoom = minZoom;
     info.maxNativeZoom = maxZoom;

@@ -11,8 +11,49 @@ import os
 import math
 import json
 
+try:
+    from PIL import Image, ImageOps
+    HAS_PIL = True
+except ImportError:
+    HAS_PIL = False
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MAPS_DIR = os.path.join(BASE_DIR, "maps")
+
+def clean_image_exif(file_path):
+    """
+    Удаляет EXIF-метаданные (геолокация, модель камеры, дата съемки и т.д.) из изображения,
+    предварительно запекая EXIF-ориентацию в физические пиксели.
+    """
+    if not HAS_PIL or not os.path.exists(file_path):
+        return False
+
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext not in [".jpg", ".jpeg", ".png", ".webp"]:
+        return False
+
+    try:
+        with Image.open(file_path) as img:
+            # 1. Применяем EXIF-ориентацию в пиксели перед удалением метаданных
+            transposed = ImageOps.exif_transpose(img)
+            if transposed is None:
+                transposed = img
+
+            # 2. Создаем чистое изображение без EXIF/XMP
+            clean_img = Image.new(transposed.mode, transposed.size)
+            clean_img.paste(transposed)
+
+            # 3. Сохраняем поверх без метаданных
+            if ext in [".jpg", ".jpeg"]:
+                clean_img.save(file_path, format="JPEG", quality=95, optimize=True)
+            elif ext == ".png":
+                clean_img.save(file_path, format="PNG", optimize=True)
+            elif ext == ".webp":
+                clean_img.save(file_path, format="WEBP", quality=95)
+            return True
+    except Exception as e:
+        print(f"    ⚠️ Не удалось очистить EXIF у {file_path}: {e}")
+        return False
 
 def tile2lon(x, z):
     return x / (1 << z) * 360.0 - 180.0
@@ -79,12 +120,19 @@ def process_maps():
         dot_map_dir = os.path.join(map_path, ".map")
         os.makedirs(dot_map_dir, exist_ok=True)
 
-        # Проверяем наличие оригинала в .map/
+        # Проверяем наличие файла оригинала в .map/
         original_file = ""
+        # 1. Ищем файлы, начинающиеся на original. (original.png, original.jpg, original.tif и т.д.)
         for f in os.listdir(dot_map_dir):
             if f.lower().startswith("original."):
                 original_file = f
                 break
+        # 2. Если нет original.*, ищем любое изображение в .map/
+        if not original_file:
+            for f in os.listdir(dot_map_dir):
+                if f.lower() != "info.json" and f.lower().endswith((".jpg", ".jpeg", ".png", ".webp", ".tif", ".tiff", ".pdf")):
+                    original_file = f
+                    break
 
         info_path = os.path.join(dot_map_dir, "info.json")
         info = {}
@@ -98,9 +146,11 @@ def process_maps():
 
         is_new = not os.path.exists(info_path)
 
-        # Заполняем / обновляем поля
+        # 1. Всегда синхронизируем id с именем папки
         info["id"] = entry
-        if "title" not in info or not info["title"]:
+
+        # 2. Если название дефолтное/пустое/из шаблона
+        if "title" not in info or not info["title"] or info["title"] == "Название исторического плана или карты":
             info["title"] = f"Исторический план ({entry})"
         if "year" not in info:
             info["year"] = ""
@@ -108,9 +158,22 @@ def process_maps():
             info["description"] = "Описание исторического плана."
         if "source" not in info:
             info["source"] = "Городской архив"
-        if "original" not in info or not info["original"]:
+
+        # 3. Синхронизируем оригинал: проверяем реальный файл на диске
+        current_orig = info.get("original", "")
+        if current_orig:
+            if not os.path.exists(os.path.join(dot_map_dir, current_orig)):
+                info["original"] = original_file
+        else:
             info["original"] = original_file
 
+        # Очищаем EXIF из файла оригинала (если есть)
+        if info["original"]:
+            orig_path = os.path.join(dot_map_dir, info["original"])
+            if os.path.exists(orig_path):
+                clean_image_exif(orig_path)
+
+        # 4. Технические параметры всегда берутся из актуальных тайлов
         info["tileFormat"] = ext
         info["minZoom"] = min_zoom
         info["maxNativeZoom"] = max_zoom

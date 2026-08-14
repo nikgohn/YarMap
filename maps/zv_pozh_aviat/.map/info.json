@@ -1,0 +1,24 @@
+{
+  "id": "zv_pozh_aviat",
+  "title": "Генплан Райисполкома ЗЖР",
+  "year": "1953г.",
+  "description": "Проект Райисполкома в Заволжском районе г. Ярославле",
+  "source": "Государственный архив Ярославской области (ГАЯО) / Горархитектура",
+  "original": "original.png",
+  "tileFormat": "png",
+  "minZoom": 12,
+  "maxNativeZoom": 19,
+  "maxZoom": 22,
+  "defaultVisible": false,
+  "defaultOpacity": 0.85,
+  "bounds": [
+    [
+      57.63658,
+      39.90509
+    ],
+    [
+      57.63989,
+      39.91264
+    ]
+  ]
+}
