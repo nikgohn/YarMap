@@ -1,0 +1,24 @@
+{
+  "id": "sovet_RZD",
+  "title": "Генплан жилого дома управления СЖД",
+  "year": "1936г.",
+  "description": "Проект жилого дома управления Северной железной дороги",
+  "source": "Государственный архив Ярославской области (ГАЯО) / Горархитектура",
+  "original": "original.jpg",
+  "tileFormat": "png",
+  "minZoom": 12,
+  "maxNativeZoom": 19,
+  "maxZoom": 22,
+  "defaultVisible": false,
+  "defaultOpacity": 0.85,
+  "bounds": [
+    [
+      57.62739,
+      39.88655
+    ],
+    [
+      57.63401,
+      39.89822
+    ]
+  ]
+}
