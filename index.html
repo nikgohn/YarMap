@@ -1333,7 +1333,7 @@
     async function loadMaps() {
       let mapIds = DEFAULT_MAP_IDS;
       try {
-        const res = await fetch('./maps/maps.json');
+        const res = await fetch('./maps/maps.json?_t=' + Date.now(), { cache: 'no-cache' });
         if (res.ok) {
           mapIds = await res.json();
         }
@@ -1368,7 +1368,7 @@
         }
 
         try {
-          const infoRes = await fetch(`./maps/${id}/.map/info.json`);
+          const infoRes = await fetch(`./maps/${id}/.map/info.json?_t=` + Date.now(), { cache: 'no-cache' });
           if (infoRes.ok) {
             const infoData = await infoRes.json();
             meta = { ...meta, ...infoData, id: id };
