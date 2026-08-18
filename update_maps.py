@@ -158,6 +158,10 @@ def process_maps():
             info["description"] = "Описание исторического плана."
         if "source" not in info:
             info["source"] = "Городской архив"
+        if "group" not in info:
+            info["group"] = ""
+        if "groupTitle" not in info:
+            info["groupTitle"] = ""
 
         # 3. Синхронизируем оригинал: проверяем реальный файл на диске
         current_orig = info.get("original", "")

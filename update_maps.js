@@ -116,6 +116,8 @@ function processMaps() {
     if (info.year === undefined) info.year = "";
     if (!info.description) info.description = "Описание исторического плана.";
     if (!info.source) info.source = "Городской архив";
+    if (info.group === undefined) info.group = "";
+    if (info.groupTitle === undefined) info.groupTitle = "";
 
     // 3. Синхронизируем оригинал по реальному файлу на диске
     if (info.original) {

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Исторические карты и разметка города</title>
+  <title>Исторические карты и разметка города — Ярославль</title>
   
   <!-- Leaflet CSS & JS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -81,16 +81,17 @@
       -webkit-backdrop-filter: var(--blur);
       border: 1px solid var(--border-color);
       border-radius: var(--radius);
-      padding: 10px 16px;
+      padding: 9px 15px;
       box-shadow: var(--shadow);
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       pointer-events: auto;
+      transition: all 0.2s ease;
     }
 
     .brand-title {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 600;
       color: #fff;
       display: flex;
@@ -104,16 +105,56 @@
       background: rgba(56, 139, 253, 0.2);
       color: var(--accent-hover);
       border: 1px solid rgba(56, 139, 253, 0.4);
-      padding: 2px 8px;
+      padding: 2px 7px;
       border-radius: 20px;
     }
 
-    /* Control Panel */
+    /* Floating Expand Trigger Button (Shown when Panel is Collapsed) */
+    .btn-floating-panel {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 1001;
+      background: var(--bg-panel);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 9px 14px;
+      box-shadow: var(--shadow);
+      color: var(--text-main);
+      font-size: 13px;
+      font-weight: 600;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: inherit;
+    }
+
+    .btn-floating-panel:hover {
+      background: var(--bg-panel-hover);
+      border-color: var(--border-active);
+      transform: translateY(-1px);
+    }
+
+    .btn-floating-panel.visible {
+      display: flex;
+      animation: fadeInScale 0.25s ease;
+    }
+
+    @keyframes fadeInScale {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Main Control Panel */
     .control-panel {
       position: absolute;
       top: 16px;
       right: 16px;
-      width: 350px;
+      width: 360px;
       max-height: calc(100vh - 32px);
       z-index: 1000;
       background: var(--bg-panel);
@@ -125,16 +166,26 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s;
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease, max-height 0.3s ease;
+      transform-origin: top right;
+    }
+
+    .control-panel.collapsed {
+      transform: scale(0.95) translateY(-10px);
+      opacity: 0;
+      pointer-events: none;
+      max-height: 0;
+      visibility: hidden;
     }
 
     .panel-header {
-      padding: 14px 16px;
+      padding: 12px 16px;
       border-bottom: 1px solid var(--border-color);
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 10px;
+      flex-shrink: 0;
     }
 
     .panel-title {
@@ -156,7 +207,7 @@
       overflow-y: auto;
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
       scrollbar-width: thin;
       scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
     }
@@ -173,7 +224,7 @@
     }
 
     .section-title {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       color: var(--text-muted);
       text-transform: uppercase;
@@ -198,7 +249,7 @@
       border: none;
       background: transparent;
       color: var(--text-muted);
-      padding: 8px 10px;
+      padding: 7px 10px;
       font-size: 12px;
       font-weight: 500;
       border-radius: 6px;
@@ -308,12 +359,14 @@
       background: rgba(248, 81, 73, 0.25);
     }
 
-    /* Layer Items */
+    /* ==========================================
+       Layer Cards & Nested Groups
+       ========================================== */
     .layer-card {
       background: var(--bg-card);
       border: 1px solid var(--border-color);
       border-radius: 10px;
-      padding: 10px 12px;
+      padding: 9px 11px;
       margin-bottom: 8px;
       transition: all 0.15s ease;
     }
@@ -338,7 +391,7 @@
     .layer-main {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
       flex: 1;
       cursor: pointer;
       user-select: none;
@@ -349,8 +402,8 @@
     .layer-main input[type="radio"] {
       cursor: pointer;
       accent-color: var(--accent-color);
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
       flex-shrink: 0;
     }
 
@@ -362,7 +415,7 @@
     }
 
     .layer-title-text {
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 500;
       color: var(--text-main);
       white-space: nowrap;
@@ -379,7 +432,7 @@
     .layer-tools {
       display: flex;
       align-items: center;
-      gap: 4px;
+      gap: 3px;
       flex-shrink: 0;
     }
 
@@ -387,8 +440,8 @@
       background: transparent;
       border: 1px solid transparent;
       color: var(--text-muted);
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border-radius: 6px;
       display: flex;
       align-items: center;
@@ -403,25 +456,142 @@
       border-color: var(--border-color);
     }
 
-    /* Slider Container */
+    /* Nested Folder Group Container */
+    .layer-group-card {
+      background: rgba(255, 255, 255, 0.025);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .layer-group-card.has-active {
+      border-color: rgba(56, 139, 253, 0.4);
+    }
+
+    .group-head {
+      padding: 9px 11px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease;
+    }
+
+    .group-head:hover {
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .group-info-main {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .group-collapse-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s ease;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    .group-collapse-btn.open {
+      transform: rotate(90deg);
+      color: var(--accent-hover);
+    }
+
+    .group-folder-icon {
+      color: var(--accent-hover);
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .group-title-text {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .group-badge {
+      font-size: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text-muted);
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .group-children {
+      padding: 4px 8px 8px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-left: 2px solid rgba(56, 139, 253, 0.25);
+      margin-left: 16px;
+      margin-top: 4px;
+      margin-bottom: 6px;
+      transition: all 0.25s ease;
+    }
+
+    .group-children.collapsed {
+      display: none;
+    }
+
+    .layer-child-card {
+      background: rgba(0, 0, 0, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 7px 10px;
+      transition: all 0.15s ease;
+    }
+
+    .layer-child-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
+
+    .layer-child-card.active {
+      border-color: var(--border-active);
+      background: var(--bg-card-active);
+    }
+
+    /* Slider Container inside Card */
     .slider-row {
-      margin-top: 10px;
-      padding-top: 8px;
+      margin-top: 8px;
+      padding-top: 6px;
       border-top: 1px solid rgba(255, 255, 255, 0.06);
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
     }
 
     .slider-row label {
-      font-size: 11px;
+      font-size: 10.5px;
       color: var(--text-muted);
-      min-width: 70px;
+      min-width: 65px;
     }
 
     .slider-row input[type="range"] {
       flex: 1;
-      height: 5px;
+      height: 4px;
       border-radius: 4px;
       background: rgba(255, 255, 255, 0.15);
       outline: none;
@@ -430,29 +600,11 @@
     }
 
     .slider-val {
-      font-size: 11px;
+      font-size: 10.5px;
       font-variant-numeric: tabular-nums;
       color: var(--text-muted);
-      min-width: 32px;
+      min-width: 28px;
       text-align: right;
-    }
-
-    /* Base Map Select */
-    .select-styled {
-      width: 100%;
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 9px 12px;
-      border-radius: 8px;
-      font-size: 13px;
-      outline: none;
-      cursor: pointer;
-      font-family: inherit;
-    }
-
-    .select-styled:focus {
-      border-color: var(--accent-color);
     }
 
     /* Action Buttons */
@@ -460,15 +612,15 @@
       background: rgba(255, 255, 255, 0.07);
       border: 1px solid var(--border-color);
       color: var(--text-main);
-      padding: 6px 10px;
+      padding: 5px 9px;
       border-radius: 7px;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 500;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       transition: all 0.15s ease;
       font-family: inherit;
     }
@@ -490,6 +642,96 @@
 
     .btn-primary:hover {
       background: var(--accent-hover);
+    }
+
+    /* ==========================================
+       Standalone Bottom Floating Widgets
+       ========================================== */
+    .bottom-controls-container {
+      position: absolute;
+      bottom: 24px;
+      right: 16px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    /* Minimalist Master Opacity Slider (No Background, No Text, Pure Slider) */
+    .master-slider-widget {
+      width: 150px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0;
+      margin: 0;
+    }
+
+    .master-slider-widget input[type="range"] {
+      width: 100%;
+      height: 5px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      outline: none;
+      accent-color: var(--accent-hover);
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s ease;
+    }
+
+    .master-slider-widget input[type="range"]:hover {
+      background: rgba(255, 255, 255, 0.55);
+      height: 6px;
+    }
+
+    /* Basemap Provider Selector Box */
+    .basemap-widget {
+      background: var(--bg-panel);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 8px 4px 10px;
+      transition: all 0.2s ease;
+    }
+
+    .basemap-widget:hover {
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+
+    .basemap-widget-icon {
+      color: var(--accent-hover);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .basemap-select {
+      background: transparent;
+      border: none;
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 500;
+      outline: none;
+      cursor: pointer;
+      font-family: inherit;
+      padding-right: 4px;
+    }
+
+    .basemap-select option {
+      background: #161b22;
+      color: #fff;
     }
 
     /* Info Modal */
@@ -540,7 +782,7 @@
     }
 
     .modal-head-title {
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 600;
       color: #fff;
     }
@@ -627,8 +869,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 40px;
-      height: 40px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
       background: #ffffff;
       box-shadow: 0 4px 18px rgba(0, 0, 0, 0.5);
@@ -723,18 +965,33 @@
       100% { transform: scale(1.6); opacity: 0; }
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
       .control-panel {
-        width: calc(100vw - 32px);
-        max-height: 55vh;
+        width: calc(100vw - 24px);
+        right: 12px;
+        top: 12px;
+        max-height: 60vh;
       }
       .brand-card {
         left: 12px;
         top: 12px;
-        padding: 6px 12px;
+        padding: 6px 10px;
       }
       .brand-title {
-        font-size: 13px;
+        font-size: 12px;
+      }
+      .btn-floating-panel {
+        top: 12px;
+        right: 12px;
+        padding: 7px 11px;
+        font-size: 12px;
+      }
+      .bottom-controls-container {
+        bottom: 12px;
+        right: 12px;
+      }
+      .info-bar {
+        display: none;
       }
     }
   </style>
@@ -744,7 +1001,7 @@
   <!-- Brand Title -->
   <div class="brand-card">
     <div class="brand-title">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 1 6"></polygon>
         <line x1="8" y1="2" x2="8" y2="18"></line>
         <line x1="16" y1="6" x2="16" y2="22"></line>
@@ -754,32 +1011,49 @@
     <span class="brand-badge" id="map-count-badge">Загрузка...</span>
   </div>
 
+  <!-- Floating Button to Open Panel when Collapsed -->
+  <button class="btn-floating-panel" id="btn-floating-panel" title="Открыть список планов">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 1 6"></polygon>
+      <line x1="8" y1="2" x2="8" y2="18"></line>
+      <line x1="16" y1="6" x2="16" y2="22"></line>
+    </svg>
+    <span>Планы</span>
+    <span class="brand-badge" id="floating-count-badge">0</span>
+  </button>
+
   <!-- Map Container -->
   <div id="map"></div>
 
   <!-- Swipe Divider Bar -->
   <div id="swipe-divider">
     <div id="swipe-handle">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <polyline points="15 18 9 12 15 6"></polyline>
       </svg>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left: -8px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-left: -7px;">
         <polyline points="9 18 15 12 9 6"></polyline>
       </svg>
     </div>
   </div>
 
   <!-- Control Panel -->
-  <div class="control-panel">
+  <div class="control-panel" id="control-panel">
     <div class="panel-header">
-      <span class="panel-title">Слои и карты</span>
+      <span class="panel-title">Слои и планы</span>
       <div class="panel-actions">
         <button class="btn-action" id="btn-fit" title="Приблизить к центру планов">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="10"></circle>
             <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
           </svg>
           К центру
+        </button>
+        <!-- Collapse Button -->
+        <button class="tool-icon-btn" id="btn-collapse-panel" title="Свернуть панель">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
         </button>
       </div>
     </div>
@@ -840,22 +1114,35 @@
           👉 <b>Режим шторки:</b> выберите один план выше и двигайте вертикальную полосу по экрану для сравнения со спутником.
         </div>
       </div>
+    </div>
+  </div>
 
-      <!-- Base Map Selection -->
-      <div>
-        <div class="section-title">Современная подложка</div>
-        <select class="select-styled" id="basemap-select">
-          <option value="esri_sat">Спутник ESRI (Высокое качество)</option>
-          <option value="yandex_sat">Спутник Яндекс (Официальный)</option>
-          <option value="yandex_hybrid">Яндекс Спутник + Улицы (Гибрид)</option>
-          <option value="google_sat">Спутник Google</option>
-          <option value="google_hybrid">Спутник Google + Дороги (Гибрид)</option>
-          <option value="osm">OpenStreetMap (Схема)</option>
-          <option value="carto_dark">Темная схема (CartoDB Dark)</option>
-          <option value="carto_light">Светлая схема (CartoDB Light)</option>
-        </select>
+  <!-- Bottom Standalone Floating Widgets -->
+  <div class="bottom-controls-container">
+    <!-- Master Opacity Slider (No background, no text, pure slider) -->
+    <div class="master-slider-widget" id="master-slider-box" title="Общая прозрачность всех планов (100%)">
+      <input type="range" id="master-opacity" min="0" max="100" value="100" />
+    </div>
+
+    <!-- Basemap Provider Selection Block -->
+    <div class="basemap-widget" id="basemap-widget">
+      <div class="basemap-widget-icon" title="Спутниковая подложка">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 1 6"></polygon>
+          <line x1="8" y1="2" x2="8" y2="18"></line>
+          <line x1="16" y1="6" x2="16" y2="22"></line>
+        </svg>
       </div>
-
+      <select class="basemap-select" id="basemap-select">
+        <option value="esri_sat">Спутник ESRI</option>
+        <option value="yandex_sat">Яндекс Спутник</option>
+        <option value="yandex_hybrid">Яндекс Гибрид</option>
+        <option value="google_sat">Google Спутник</option>
+        <option value="google_hybrid">Google Гибрид</option>
+        <option value="osm">OpenStreetMap</option>
+        <option value="carto_dark">CartoDB Dark</option>
+        <option value="carto_light">CartoDB Light</option>
+      </select>
     </div>
   </div>
 
@@ -904,14 +1191,14 @@
     const INITIAL_CENTER = [57.626, 39.885];
     const INITIAL_ZOOM = 14;
 
-    const DEFAULT_MAP_IDS = ["map1", "map2", "map3", "zv_1mkr"];
+    const DEFAULT_MAP_IDS = ["map1", "map2", "map3", "zv_1mkr", "zv_1mkr_pt2", "1may_9", "zv_pozh_aviat"];
 
     // Base Maps providers (Strictly synchronized & accurate)
     const baseLayers = {
       esri_sat: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
         maxNativeZoom: 19,
         maxZoom: 22,
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+        attribution: 'Tiles &copy; Esri'
       }),
       yandex_sat: typeof L.Yandex !== 'undefined' ? new L.Yandex('satellite') : null,
       yandex_hybrid: typeof L.Yandex !== 'undefined' ? new L.Yandex('hybrid') : null,
@@ -928,17 +1215,17 @@
       osm: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxNativeZoom: 19,
         maxZoom: 22,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        attribution: '&copy; OpenStreetMap'
       }),
       carto_dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
         maxNativeZoom: 19,
         maxZoom: 22,
-        attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
+        attribution: '&copy; CARTO'
       }),
       carto_light: L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
         maxNativeZoom: 19,
         maxZoom: 22,
-        attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
+        attribution: '&copy; CARTO'
       })
     };
 
@@ -957,13 +1244,19 @@
     map.createPane('historicalPane');
     map.getPane('historicalPane').style.zIndex = 500;
 
-    // State
+    // Application State
     let mapsRegistry = [];
     const scanLayers = {};
+    const layerIndividualOpacities = {};
+    let masterOpacity = 1.0;
+
     let currentMode = 'overlay'; // 'overlay' | 'swipe'
     let currentBaseKey = 'esri_sat';
     let swipePercent = 50;
     let activeSwipeScan = '';
+
+    // Collapsed groups set (tracks which folder groups are open/closed)
+    const openGroups = new Set();
 
     // Spatial Search Marker State
     let markerSearchActive = false;
@@ -971,6 +1264,11 @@
     let activeMarkerLatLng = null;
 
     // UI Elements
+    const controlPanel = document.getElementById('control-panel');
+    const btnCollapsePanel = document.getElementById('btn-collapse-panel');
+    const btnFloatingPanel = document.getElementById('btn-floating-panel');
+    const floatingCountBadge = document.getElementById('floating-count-badge');
+
     const mapsListContainer = document.getElementById('maps-list-container');
     const mapCountBadge = document.getElementById('map-count-badge');
     const searchInput = document.getElementById('search-maps');
@@ -985,6 +1283,7 @@
     const swipeInstruction = document.getElementById('swipe-instruction');
     const coordsBar = document.getElementById('coords-bar');
     const basemapSelect = document.getElementById('basemap-select');
+    const masterOpacityInput = document.getElementById('master-opacity');
     const btnFit = document.getElementById('btn-fit');
 
     // Modal Elements
@@ -1016,6 +1315,20 @@
       infoModal.classList.add('active');
     }
 
+    // Panel Collapse / Expand Handling
+    function collapsePanel() {
+      controlPanel.classList.add('collapsed');
+      btnFloatingPanel.classList.add('visible');
+    }
+
+    function expandPanel() {
+      controlPanel.classList.remove('collapsed');
+      btnFloatingPanel.classList.remove('visible');
+    }
+
+    btnCollapsePanel.addEventListener('click', collapsePanel);
+    btnFloatingPanel.addEventListener('click', expandPanel);
+
     // Dynamic Loader: Discover and Load Maps
     async function loadMaps() {
       let mapIds = DEFAULT_MAP_IDS;
@@ -1030,7 +1343,8 @@
 
       mapsRegistry = [];
 
-      for (const id of mapIds) {
+      for (const item of mapIds) {
+        const id = typeof item === 'string' ? item : item.id;
         let meta = {
           id: id,
           title: `План (${id})`,
@@ -1038,6 +1352,8 @@
           description: '',
           source: '',
           original: '',
+          group: '',
+          groupTitle: '',
           tileFormat: 'png',
           bounds: null,
           minZoom: 10,
@@ -1046,6 +1362,10 @@
           defaultVisible: mapsRegistry.length === 0,
           defaultOpacity: 0.85
         };
+
+        if (typeof item === 'object') {
+          meta = { ...meta, ...item };
+        }
 
         try {
           const infoRes = await fetch(`./maps/${id}/.map/info.json`);
@@ -1058,6 +1378,8 @@
         }
 
         const ext = meta.tileFormat || 'png';
+        const initOp = meta.defaultOpacity !== undefined ? meta.defaultOpacity : 0.85;
+        layerIndividualOpacities[id] = initOp;
 
         // Initialize TileLayer
         scanLayers[id] = L.tileLayer(`./maps/${id}/{z}/{x}/{y}.${ext}`, {
@@ -1065,7 +1387,7 @@
           minZoom: meta.minZoom || 10,
           maxNativeZoom: meta.maxNativeZoom || 19,
           maxZoom: meta.maxZoom || 22,
-          opacity: meta.defaultOpacity || 0.85,
+          opacity: initOp * masterOpacity,
           tms: false
         });
 
@@ -1078,6 +1400,11 @@
           if (!activeSwipeScan) activeSwipeScan = id;
         }
 
+        // Auto-open group if contains active items
+        if (meta.group) {
+          openGroups.add(meta.group);
+        }
+
         mapsRegistry.push(meta);
       }
 
@@ -1085,7 +1412,9 @@
         activeSwipeScan = mapsRegistry[0].id;
       }
 
-      mapCountBadge.textContent = `${mapsRegistry.length} ${pluralizeMaps(mapsRegistry.length)}`;
+      const totalCount = mapsRegistry.length;
+      mapCountBadge.textContent = `${totalCount} ${pluralizeMaps(totalCount)}`;
+      floatingCountBadge.textContent = totalCount;
       renderMapCards();
     }
 
@@ -1106,18 +1435,56 @@
       return (lat >= south && lat <= north && lng >= west && lng <= east);
     }
 
-    // Render Cards in Sidebar
+    // Combined bounds of multiple maps
+    function getCombinedBounds(metas) {
+      let south = 90, north = -90, west = 180, east = -180;
+      let hasBounds = false;
+      metas.forEach(m => {
+        if (m.bounds && Array.isArray(m.bounds) && m.bounds.length === 2) {
+          south = Math.min(south, m.bounds[0][0], m.bounds[1][0]);
+          north = Math.max(north, m.bounds[0][0], m.bounds[1][0]);
+          west = Math.min(west, m.bounds[0][1], m.bounds[1][1]);
+          east = Math.max(east, m.bounds[0][1], m.bounds[1][1]);
+          hasBounds = true;
+        }
+      });
+      return hasBounds ? [[south, west], [north, east]] : null;
+    }
+
+    // Master Opacity Calculation
+    function updateAllLayerOpacities() {
+      mapsRegistry.forEach(m => {
+        const id = m.id;
+        const layer = scanLayers[id];
+        if (layer) {
+          const baseOp = layerIndividualOpacities[id] !== undefined ? layerIndividualOpacities[id] : (m.defaultOpacity || 0.85);
+          layer.setOpacity(baseOp * masterOpacity);
+        }
+      });
+    }
+
+    masterOpacityInput.addEventListener('input', (e) => {
+      masterOpacity = e.target.value / 100;
+      masterOpacityInput.title = `Общая прозрачность всех планов (${e.target.value}%)`;
+      updateAllLayerOpacities();
+    });
+
+    // ==========================================
+    // Render Map Cards & Nested Groups
+    // ==========================================
     function renderMapCards() {
       const textQuery = (searchInput.value || '').toLowerCase().trim();
       mapsListContainer.innerHTML = '';
 
       let matchingCount = 0;
 
-      const filtered = mapsRegistry.filter(m => {
+      // Filter maps based on search and spatial pin
+      const filteredMaps = mapsRegistry.filter(m => {
         // Text filter
         const matchesText = !textQuery || 
           m.title.toLowerCase().includes(textQuery) || 
           (m.year && m.year.toLowerCase().includes(textQuery)) ||
+          (m.groupTitle && m.groupTitle.toLowerCase().includes(textQuery)) ||
           m.id.toLowerCase().includes(textQuery);
 
         if (!matchesText) return false;
@@ -1141,7 +1508,7 @@
         markerFilterChip.classList.remove('visible');
       }
 
-      if (filtered.length === 0) {
+      if (filteredMaps.length === 0) {
         mapsListContainer.innerHTML = `
           <div style="font-size: 12px; color: var(--text-muted); text-align: center; padding: 18px 0; line-height: 1.5;">
             🔍 На этом месте исторических планов не найдено.<br/>
@@ -1151,105 +1518,278 @@
         return;
       }
 
-      filtered.forEach(meta => {
-        const id = meta.id;
-        const isVisible = map.hasLayer(scanLayers[id]);
-        const isSwipeActive = (currentMode === 'swipe' && activeSwipeScan === id);
-        const cardActive = currentMode === 'swipe' ? isSwipeActive : isVisible;
+      // Group maps into structure
+      const groupedData = [];
+      const groupMap = new Map();
 
-        const card = document.createElement('div');
-        card.className = `layer-card ${cardActive ? 'active' : ''}`;
-        card.id = `card-${id}`;
-
-        const inputType = currentMode === 'swipe' ? 'radio' : 'checkbox';
-        const isChecked = currentMode === 'swipe' ? isSwipeActive : isVisible;
-
-        card.innerHTML = `
-          <div class="layer-head">
-            <label class="layer-main">
-              <input type="${inputType}" name="historical-map-select" id="chk-${id}" ${isChecked ? 'checked' : ''} />
-              <div class="layer-text-group">
-                <span class="layer-title-text" title="${meta.title}">${meta.title}</span>
-                ${meta.year ? `<span class="layer-year-tag">${meta.year}</span>` : ''}
-              </div>
-            </label>
-            <div class="layer-tools">
-              <button class="tool-icon-btn btn-focus" title="Приблизить к этому плану" data-id="${id}">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <circle cx="12" cy="12" r="3"></circle>
-                </svg>
-              </button>
-              <button class="tool-icon-btn btn-info" title="Информация и оригинал" data-id="${id}">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <circle cx="12" cy="12" r="10"></circle>
-                  <line x1="12" y1="16" x2="12" y2="12"></line>
-                  <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                </svg>
-              </button>
-            </div>
-          </div>
-          <div class="slider-row" id="slider-box-${id}" style="${currentMode === 'swipe' ? 'display:none;' : ''}">
-            <label>Прозрачность</label>
-            <input type="range" id="op-${id}" min="0" max="100" value="${Math.round((scanLayers[id].options.opacity || 0.85) * 100)}" />
-            <span class="slider-val" id="val-${id}">${Math.round((scanLayers[id].options.opacity || 0.85) * 100)}%</span>
-          </div>
-        `;
-
-        // Toggle Event
-        const chk = card.querySelector(`#chk-${id}`);
-        chk.addEventListener('change', () => {
-          if (currentMode === 'overlay') {
-            if (chk.checked) {
-              map.addLayer(scanLayers[id]);
-              card.classList.add('active');
-            } else {
-              map.removeLayer(scanLayers[id]);
-              card.classList.remove('active');
-            }
-          } else if (currentMode === 'swipe') {
-            activeSwipeScan = id;
-            document.querySelectorAll('.layer-card').forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-
-            Object.keys(scanLayers).forEach(k => {
-              if (k === id) {
-                if (!map.hasLayer(scanLayers[k])) map.addLayer(scanLayers[k]);
-              } else {
-                if (map.hasLayer(scanLayers[k])) map.removeLayer(scanLayers[k]);
-              }
-            });
-            updateSwipeClip();
+      filteredMaps.forEach(meta => {
+        const groupKey = meta.group || (meta.groupTitle ? meta.groupTitle : null);
+        if (groupKey) {
+          if (!groupMap.has(groupKey)) {
+            const grp = {
+              isGroup: true,
+              key: groupKey,
+              title: meta.groupTitle || meta.group || 'Группа планов',
+              items: []
+            };
+            groupMap.set(groupKey, grp);
+            groupedData.push(grp);
           }
-        });
-
-        // Opacity Slider Event
-        const opInput = card.querySelector(`#op-${id}`);
-        const valSpan = card.querySelector(`#val-${id}`);
-        opInput.addEventListener('input', (e) => {
-          const v = e.target.value;
-          valSpan.textContent = `${v}%`;
-          scanLayers[id].setOpacity(v / 100);
-        });
-
-        // Focus Button Event
-        const focusBtn = card.querySelector('.btn-focus');
-        focusBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (meta.bounds) {
-            map.fitBounds(meta.bounds, { padding: [40, 40], maxZoom: 17 });
-          }
-        });
-
-        // Info Button Event
-        const infoBtn = card.querySelector('.btn-info');
-        infoBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          openInfoModal(meta);
-        });
-
-        mapsListContainer.appendChild(card);
+          groupMap.get(groupKey).items.push(meta);
+        } else {
+          groupedData.push({
+            isGroup: false,
+            meta: meta
+          });
+        }
       });
+
+      // Render items
+      groupedData.forEach(entry => {
+        if (!entry.isGroup) {
+          // Standalone Card
+          mapsListContainer.appendChild(createSingleCard(entry.meta));
+        } else {
+          // Nested Group Accordion Card
+          mapsListContainer.appendChild(createGroupCard(entry));
+        }
+      });
+    }
+
+    // Helper: Create Single Plan Card Element
+    function createSingleCard(meta, isChild = false) {
+      const id = meta.id;
+      const isVisible = map.hasLayer(scanLayers[id]);
+      const isSwipeActive = (currentMode === 'swipe' && activeSwipeScan === id);
+      const cardActive = currentMode === 'swipe' ? isSwipeActive : isVisible;
+
+      const card = document.createElement('div');
+      card.className = `${isChild ? 'layer-child-card' : 'layer-card'} ${cardActive ? 'active' : ''}`;
+      card.id = `card-${id}`;
+
+      const inputType = currentMode === 'swipe' ? 'radio' : 'checkbox';
+      const isChecked = currentMode === 'swipe' ? isSwipeActive : isVisible;
+      const currentOpPercent = Math.round((layerIndividualOpacities[id] || 0.85) * 100);
+
+      card.innerHTML = `
+        <div class="layer-head">
+          <label class="layer-main">
+            <input type="${inputType}" name="historical-map-select" id="chk-${id}" ${isChecked ? 'checked' : ''} />
+            <div class="layer-text-group">
+              <span class="layer-title-text" title="${meta.title}">${meta.title}</span>
+              ${meta.year ? `<span class="layer-year-tag">${meta.year}</span>` : ''}
+            </div>
+          </label>
+          <div class="layer-tools">
+            <button class="tool-icon-btn btn-focus" title="Приблизить к этому плану" data-id="${id}">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            </button>
+            <button class="tool-icon-btn btn-info" title="Информация и оригинал" data-id="${id}">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="16" x2="12" y2="12"></line>
+                <line x1="12" y1="8" x2="12.01" y2="8"></line>
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="slider-row" id="slider-box-${id}" style="${currentMode === 'swipe' ? 'display:none;' : ''}">
+          <label>Слой</label>
+          <input type="range" id="op-${id}" min="0" max="100" value="${currentOpPercent}" />
+          <span class="slider-val" id="val-${id}">${currentOpPercent}%</span>
+        </div>
+      `;
+
+      // Toggle Event
+      const chk = card.querySelector(`#chk-${id}`);
+      chk.addEventListener('change', () => {
+        if (currentMode === 'overlay') {
+          if (chk.checked) {
+            map.addLayer(scanLayers[id]);
+            card.classList.add('active');
+          } else {
+            map.removeLayer(scanLayers[id]);
+            card.classList.remove('active');
+          }
+          updateGroupCheckState(meta.group);
+        } else if (currentMode === 'swipe') {
+          activeSwipeScan = id;
+          document.querySelectorAll('.layer-card, .layer-child-card').forEach(c => c.classList.remove('active'));
+          card.classList.add('active');
+
+          Object.keys(scanLayers).forEach(k => {
+            if (k === id) {
+              if (!map.hasLayer(scanLayers[k])) map.addLayer(scanLayers[k]);
+            } else {
+              if (map.hasLayer(scanLayers[k])) map.removeLayer(scanLayers[k]);
+            }
+          });
+          updateSwipeClip();
+        }
+      });
+
+      // Individual Opacity Slider Event
+      const opInput = card.querySelector(`#op-${id}`);
+      const valSpan = card.querySelector(`#val-${id}`);
+      opInput.addEventListener('input', (e) => {
+        const v = e.target.value;
+        valSpan.textContent = `${v}%`;
+        layerIndividualOpacities[id] = v / 100;
+        scanLayers[id].setOpacity((v / 100) * masterOpacity);
+      });
+
+      // Focus Button Event
+      const focusBtn = card.querySelector('.btn-focus');
+      focusBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (meta.bounds) {
+          map.fitBounds(meta.bounds, { padding: [40, 40], maxZoom: 17 });
+        }
+      });
+
+      // Info Button Event
+      const infoBtn = card.querySelector('.btn-info');
+      infoBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openInfoModal(meta);
+      });
+
+      return card;
+    }
+
+    // Helper: Create Group Accordion Card Element
+    function createGroupCard(groupData) {
+      const groupKey = groupData.key;
+      const isOpen = openGroups.has(groupKey) || !!searchInput.value.trim() || !!activeMarkerLatLng;
+
+      // Group active state
+      const hasActive = groupData.items.some(m => map.hasLayer(scanLayers[m.id]));
+      const allActive = groupData.items.every(m => map.hasLayer(scanLayers[m.id]));
+
+      const groupCard = document.createElement('div');
+      groupCard.className = `layer-group-card ${hasActive ? 'has-active' : ''}`;
+      groupCard.id = `group-card-${groupKey}`;
+
+      const groupHead = document.createElement('div');
+      groupHead.className = 'group-head';
+
+      groupHead.innerHTML = `
+        <div class="group-info-main">
+          <button class="group-collapse-btn ${isOpen ? 'open' : ''}" id="btn-grp-toggle-${groupKey}" title="Свернуть/развернуть">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+          ${currentMode === 'overlay' ? `
+            <input type="checkbox" class="group-master-chk" id="grp-chk-${groupKey}" ${allActive ? 'checked' : ''} title="Включить/выключить все планы группы" />
+          ` : ''}
+          <div class="group-folder-icon">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </div>
+          <span class="group-title-text" title="${groupData.title}">${groupData.title}</span>
+          <span class="group-badge">${groupData.items.length}</span>
+        </div>
+        <div class="layer-tools">
+          <button class="tool-icon-btn btn-group-focus" title="Приблизить ко всей группе" data-grp="${groupKey}">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+            </svg>
+          </button>
+        </div>
+      `;
+
+      const groupChildren = document.createElement('div');
+      groupChildren.className = `group-children ${isOpen ? '' : 'collapsed'}`;
+      groupChildren.id = `grp-children-${groupKey}`;
+
+      // Append child cards
+      groupData.items.forEach(childMeta => {
+        groupChildren.appendChild(createSingleCard(childMeta, true));
+      });
+
+      // Master Checkbox Indeterminate state
+      const masterChk = groupHead.querySelector(`#grp-chk-${groupKey}`);
+      if (masterChk) {
+        masterChk.indeterminate = (hasActive && !allActive);
+        masterChk.addEventListener('click', (e) => e.stopPropagation());
+        masterChk.addEventListener('change', (e) => {
+          const checked = e.target.checked;
+          groupData.items.forEach(childMeta => {
+            const id = childMeta.id;
+            const childChk = groupChildren.querySelector(`#chk-${id}`);
+            if (checked) {
+              if (!map.hasLayer(scanLayers[id])) map.addLayer(scanLayers[id]);
+              if (childChk) childChk.checked = true;
+              const childCard = groupChildren.querySelector(`#card-${id}`);
+              if (childCard) childCard.classList.add('active');
+            } else {
+              if (map.hasLayer(scanLayers[id])) map.removeLayer(scanLayers[id]);
+              if (childChk) childChk.checked = false;
+              const childCard = groupChildren.querySelector(`#card-${id}`);
+              if (childCard) childCard.classList.remove('active');
+            }
+          });
+          groupCard.classList.toggle('has-active', checked);
+        });
+      }
+
+      // Group Accordion Fold/Unfold Toggle
+      groupHead.addEventListener('click', () => {
+        const currentlyOpen = !groupChildren.classList.contains('collapsed');
+        if (currentlyOpen) {
+          groupChildren.classList.add('collapsed');
+          groupHead.querySelector('.group-collapse-btn').classList.remove('open');
+          openGroups.delete(groupKey);
+        } else {
+          groupChildren.classList.remove('collapsed');
+          groupHead.querySelector('.group-collapse-btn').classList.add('open');
+          openGroups.add(groupKey);
+        }
+      });
+
+      // Group Focus Button
+      const groupFocusBtn = groupHead.querySelector('.btn-group-focus');
+      groupFocusBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const combBounds = getCombinedBounds(groupData.items);
+        if (combBounds) {
+          map.fitBounds(combBounds, { padding: [40, 40], maxZoom: 17 });
+        }
+      });
+
+      groupCard.appendChild(groupHead);
+      groupCard.appendChild(groupChildren);
+      return groupCard;
+    }
+
+    // Helper: Refresh group header checkbox state after individual child change
+    function updateGroupCheckState(groupKey) {
+      if (!groupKey) return;
+      const grpCard = document.getElementById(`group-card-${groupKey}`);
+      if (!grpCard) return;
+      const masterChk = grpCard.querySelector(`#grp-chk-${groupKey}`);
+      if (!masterChk) return;
+
+      const groupItems = mapsRegistry.filter(m => (m.group === groupKey || m.groupTitle === groupKey));
+      const activeCount = groupItems.filter(m => map.hasLayer(scanLayers[m.id])).length;
+
+      grpCard.classList.toggle('has-active', activeCount > 0);
+      if (activeCount === 0) {
+        masterChk.checked = false;
+        masterChk.indeterminate = false;
+      } else if (activeCount === groupItems.length) {
+        masterChk.checked = true;
+        masterChk.indeterminate = false;
+      } else {
+        masterChk.checked = false;
+        masterChk.indeterminate = true;
+      }
     }
 
     searchInput.addEventListener('input', renderMapCards);
